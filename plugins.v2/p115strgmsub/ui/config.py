@@ -263,32 +263,19 @@ class UIConfig:
                         'content': [{
                             'component': 'VCol',
                             'props': {'cols': 12},
-                            'content': [{'component': 'VAlert', 'props': {'type': 'info', 'variant': 'tonal', 'text': 'HDHive资源查询：基于TMDB ID查询115网盘资源。API模式使用Cookie直接请求；Playwright模式使用浏览器模拟获取分享链接（需安装 playwright 和 firefox）'}}]
+                            'content': [{'component': 'VAlert', 'props': {'type': 'info', 'variant': 'tonal', 'text': 'HDHive资源查询：基于TMDB ID查询115网盘资源，使用 Playwright 浏览器模拟获取分享链接（需安装 playwright 和 chromium）'}}]
                         }]
                     },
                     # HDHive 配置
                     {
                         'component': 'VRow',
                         'content': [
-                            {'component': 'VCol', 'props': {'cols': 12, 'md': 4},
+                             {'component': 'VCol', 'props': {'cols': 12, 'md': 4},
                              'content': [{'component': 'VSwitch', 'props': {'model': 'hdhive_enabled', 'label': '启用 HDHive'}}]},
                             {'component': 'VCol', 'props': {'cols': 12, 'md': 4},
-                             'content': [{'component': 'VSelect', 'props': {'model': 'hdhive_query_mode', 'label': '查询模式',
-                                 'items': [{'title': 'Playwright 模式', 'value': 'playwright'}, {'title': 'API 模式', 'value': 'api'}]}}]},
-                            {'component': 'VCol', 'props': {'cols': 12, 'md': 4},
-                             'content': [{'component': 'VSwitch', 'props': {'model': 'hdhive_auto_refresh', 'label': 'Cookie 自动刷新'}}]},
-                        ]
-                    },
-                    # HDHive Cookie 配置
-                    {
-                        'component': 'VRow',
-                        'content': [
-                            {'component': 'VCol', 'props': {'cols': 12, 'md': 3},
                              'content': [{'component': 'VTextField', 'props': {'model': 'hdhive_username', 'label': 'HDHive 用户名', 'placeholder': 'HDHive 用户名'}}]},
-                            {'component': 'VCol', 'props': {'cols': 12, 'md': 3},
-                             'content': [{'component': 'VTextField', 'props': {"clearable": True, 'model': 'hdhive_password', 'label': 'HDHive 密码', 'type': 'password', 'placeholder': 'HDHive 密码'}}]},
-                            {'component': 'VCol', 'props': {'cols': 12, 'md': 6},
-                             'content': [{'component': 'VTextField', 'props': {"clearable": True, 'model': 'hdhive_cookie', 'label': 'HDHive Cookie', 'type': 'password', 'placeholder': 'token=xxx; csrf_access_token=xxx（启用自动刷新后会自动更新）'}}]}
+                            {'component': 'VCol', 'props': {'cols': 12, 'md': 4},
+                             'content': [{'component': 'VTextField', 'props': {"clearable": True, 'model': 'hdhive_password', 'label': 'HDHive 密码', 'type': 'password', 'placeholder': 'HDHive 密码'}}]}
                         ]
                     },
                     # 风控防护说明

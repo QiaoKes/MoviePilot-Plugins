@@ -44,7 +44,7 @@ class P115StrgmSub(_PluginBase):
     # 插件图标
     plugin_icon = "https://raw.githubusercontent.com/jxxghp/MoviePilot-Plugins/main/icons/cloud.png"
     # 插件版本
-    plugin_version = "1.3.0"
+    plugin_version = "1.3.1"
     # 插件作者
     plugin_author = "mrtian2016"
     # 作者主页
@@ -669,37 +669,14 @@ class P115StrgmSub(_PluginBase):
                 self._nullbr_client = NullbrClient(app_id=self._nullbr_appid, api_key=self._nullbr_api_key, proxy=proxy)
                 logger.info("Nullbr 客户端初始化成功")
 
-        # HDHive 客户端初始化
+        # HDHive 客户端初始化（仅 Playwright 模式，搜索时动态创建客户端）
         if self._hdhive_enabled:
-            if self._hdhive_query_mode == "playwright":
-                # Playwright 模式：搜索时动态创建客户端
-                if not self._hdhive_username or not self._hdhive_password:
-                    logger.warning("HDHive Playwright 模式需要配置用户名和密码")
-                    self._hdhive_client = None
-                else:
-                    logger.info("HDHive 配置已加载（Playwright 模式，搜索时动态创建客户端）")
-                    self._hdhive_client = None
+            if not self._hdhive_username or not self._hdhive_password:
+                logger.warning("HDHive 已启用但未配置用户名和密码，将无法使用 HDHive 查询功能")
+                self._hdhive_client = None
             else:
-                # API 模式：需要有效的 Cookie
-                if not self._hdhive_cookie and not (self._hdhive_username and self._hdhive_password):
-                    logger.warning("HDHive API 模式需要配置 Cookie（或用户名/密码用于自动刷新）")
-                    self._hdhive_client = None
-                else:
-                    # 检查并刷新 Cookie
-                    effective_cookie = self._check_and_refresh_hdhive_cookie()
-
-                    if effective_cookie:
-                        try:
-                            from .lib.hdhive import create_client as create_hdhive_client
-                            logger.info(f"HDHive API 模式使用 PROXY: {proxy}")
-                            self._hdhive_client = create_hdhive_client(cookie=effective_cookie, proxy=proxy)
-                            logger.info("HDHive 客户端初始化成功（API 模式）")
-                        except Exception as e:
-                            logger.warning(f"HDHive 客户端初始化失败：{e}")
-                            self._hdhive_client = None
-                    else:
-                        logger.warning("HDHive API 模式缺少有效 Cookie，请配置 Cookie 或启用自动刷新")
-                        self._hdhive_client = None
+                logger.info("HDHive 配置已加载（Playwright 模式，搜索时动态创建客户端）")
+                self._hdhive_client = None
 
         if self._cookies:
             self._p115_manager = P115ClientManager(cookies=self._cookies)
@@ -721,7 +698,6 @@ class P115StrgmSub(_PluginBase):
             pansou_enabled=self._pansou_enabled,
             nullbr_enabled=self._nullbr_enabled,
             hdhive_enabled=self._hdhive_enabled,
-            hdhive_query_mode=self._hdhive_query_mode,
             hdhive_username=self._hdhive_username,
             hdhive_password=self._hdhive_password,
             hdhive_cookie=self._hdhive_cookie,

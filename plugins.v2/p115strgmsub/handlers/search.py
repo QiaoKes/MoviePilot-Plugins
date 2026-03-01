@@ -23,7 +23,6 @@ class SearchHandler:
         pansou_enabled: bool = False,
         nullbr_enabled: bool = False,
         hdhive_enabled: bool = False,
-        hdhive_query_mode: str = "playwright",
         hdhive_username: str = "",
         hdhive_password: str = "",
         hdhive_cookie: str = "",
@@ -35,11 +34,10 @@ class SearchHandler:
 
         :param pansou_client: PanSou 客户端实例
         :param nullbr_client: Nullbr 客户端实例
-        :param hdhive_client: HDHive 客户端实例
+        :param hdhive_client: HDHive 客户端实例（保留兼容，实际 Playwright 模式不使用）
         :param pansou_enabled: 是否启用 PanSou
         :param nullbr_enabled: 是否启用 Nullbr
         :param hdhive_enabled: 是否启用 HDHive
-        :param hdhive_query_mode: HDHive 查询模式 (playwright/api)
         :param hdhive_username: HDHive 用户名
         :param hdhive_password: HDHive 密码
         :param hdhive_cookie: HDHive Cookie
@@ -52,7 +50,6 @@ class SearchHandler:
         self._pansou_enabled = pansou_enabled
         self._nullbr_enabled = nullbr_enabled
         self._hdhive_enabled = hdhive_enabled
-        self._hdhive_query_mode = hdhive_query_mode
         self._hdhive_username = hdhive_username
         self._hdhive_password = hdhive_password
         self._hdhive_cookie = hdhive_cookie
@@ -71,10 +68,9 @@ class SearchHandler:
         if self._nullbr_enabled and self._nullbr_client:
             sources.append("nullbr")
 
-        # HDHive
+        # HDHive（仅支持 Playwright 模式，需要用户名和密码）
         if self._hdhive_enabled:
-            # HDHive 可以有同步客户端或仅配置用户名密码（用于 Playwright 模式）
-            if self._hdhive_client or (self._hdhive_username and self._hdhive_password):
+            if self._hdhive_username and self._hdhive_password:
                 sources.append("hdhive")
 
         # PanSou
@@ -295,11 +291,8 @@ class SearchHandler:
 
         hdhive_media_type = HDHiveMediaType.MOVIE if media_type == MediaType.MOVIE else HDHiveMediaType.TV
 
-        # 根据配置的查询模式选择
-        if self._hdhive_query_mode == "playwright":
-            return self._search_hdhive_playwright(mediainfo, hdhive_media_type)
-        else:  # api 模式
-            return self._search_hdhive_api(mediainfo, hdhive_media_type)
+        # 强制使用 Playwright 模式
+        return self._search_hdhive_playwright(mediainfo, hdhive_media_type)
 
     def _search_hdhive_playwright(self, mediainfo: MediaInfo, hdhive_media_type) -> List[Dict]:
         """
