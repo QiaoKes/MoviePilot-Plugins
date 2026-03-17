@@ -404,11 +404,12 @@ class SearchHandler:
 
             # 1. 获取资源列表
             url = f"https://hdhive.com/api/open/resources/{hdhive_media_type}/{mediainfo.tmdb_id}"
-            proxies = {"http": settings.PROXY, "https": settings.PROXY} if settings.PROXY else None
+            proxy = settings.PROXY
+            proxies = proxy if isinstance(proxy, dict) else {"http": proxy, "https": proxy} if proxy else None
 
             res = requests.get(url, headers=headers, proxies=proxies, timeout=15)
             logger.info(f"HDHive (API) GET {url} 返回状态: {res.status_code}")
-            logger.debug(f"HDHive (API) 响应内容: {res.text}")
+            logger.info(f"HDHive (API) 响应内容: {res.text}")
             
             if res.status_code != 200:
                 logger.info(f"HDHive (API) 获取资源失败, status: {res.status_code}")
@@ -432,18 +433,18 @@ class SearchHandler:
                 # if isinstance(website, dict):
                 #     website_value = str(website.get("value", ""))
                 #     if website_value and website_value != "115":
-                #         logger.debug(f"HDHive (API) 资源 {resource.get('title')} 的 website_value 不是 115 ({website_value})，跳过")
+                #         logger.info(f"HDHive (API) 资源 {resource.get('title')} 的 website_value 不是 115 ({website_value})，跳过")
                 #         continue
                 # elif isinstance(website, str):
                 #     if website and website != "115":
-                #         logger.debug(f"HDHive (API) 资源 {resource.get('title')} 的 website 不是 115 ({website})，跳过")
+                #         logger.info(f"HDHive (API) 资源 {resource.get('title')} 的 website 不是 115 ({website})，跳过")
                 #         continue
                 
                 # 2. 免费策略/积分判断
                 unlock_points = resource.get("unlock_points")
                 is_free = unlock_points is None or unlock_points == 0 or resource.get("is_unlocked")
                 
-                logger.debug(f"HDHive (API) 处理资源: title='{resource.get('title')}', slug='{resource.get('slug')}', unlock_points={unlock_points}, is_unlocked={resource.get('is_unlocked')}, is_free={is_free}")
+                logger.info(f"HDHive (API) 处理资源: title='{resource.get('title')}', slug='{resource.get('slug')}', unlock_points={unlock_points}, is_unlocked={resource.get('is_unlocked')}, is_free={is_free}")
 
                 # 单个资源积分超出单订阅预算上限的，搜索阶段直接过滤掉（这些无论如何都解锁不了）
                 if not is_free and unlock_points is not None:
@@ -457,16 +458,16 @@ class SearchHandler:
                 if is_free or self._hdhive_auto_unlock:
                     slug = resource.get("slug")
                     if not slug:
-                        logger.debug(f"HDHive (API) 资源缺少 slug，跳过: {resource}")
+                        logger.info(f"HDHive (API) 资源缺少 slug，跳过: {resource}")
                         continue
 
                     # 如果免费，则直接解锁并获取链接
                     if is_free:
                         unlock_url = "https://hdhive.com/api/open/resources/unlock"
-                        logger.debug(f"HDHive (API) 尝试免费解锁资源: {slug}")
+                        logger.info(f"HDHive (API) 尝试免费解锁资源: {slug}")
                         unlock_res = requests.post(unlock_url, json={"slug": slug}, headers=headers, proxies=proxies, timeout=15)
                         
-                        logger.debug(f"HDHive (API) 解锁 {slug} 返回状态: {unlock_res.status_code}, 内容: {unlock_res.text}")
+                        logger.info(f"HDHive (API) 解锁 {slug} 返回状态: {unlock_res.status_code}, 内容: {unlock_res.text}")
                         
                         if unlock_res.status_code == 200:
                             unlock_data = unlock_res.json()
@@ -486,7 +487,7 @@ class SearchHandler:
                             logger.error(f"HDHive (API) 解锁请求失败，状态码: {unlock_res.status_code}")
                     else:
                         # 对于非免费资源，延迟解锁：返回标记并携带 slug，后续供 SyncHandler 按需调用 unlock
-                        logger.debug(f"HDHive (API) 收费资源将其加入列表延迟解锁: {slug}")
+                        logger.info(f"HDHive (API) 收费资源将其加入列表延迟解锁: {slug}")
                         free_115_resources.append({
                             "url": "",  # 此时没有真正的链接
                             "title": resource.get("title", ""),
@@ -497,7 +498,7 @@ class SearchHandler:
                             "is_official": bool(resource.get("is_official"))
                         })
                 else:
-                    logger.debug(f"HDHive (API) 资源 {resource.get('title')} 非免费且未开启自动解锁，已跳过")
+                    logger.info(f"HDHive (API) 资源 {resource.get('title')} 非免费且未开启自动解锁，已跳过")
 
             if free_115_resources:
                 # 排序：免费优先，同组内官方(is_official)优先
@@ -543,7 +544,7 @@ class SearchHandler:
         self._current_spent_points = 0
         self._sub_spent_points = 0
         self._current_sub_key = ""
-        logger.debug("HDHive (API) 任务全局积分账本已重置")
+        logger.info("HDHive (API) 任务全局积分账本已重置")
 
     def reset_sub_spent_points(self, sub_key: str = ""):
         """
@@ -558,7 +559,7 @@ class SearchHandler:
             if self._sub_spent_points > 0:
                 logger.info(f"HDHive (API) 订阅 {sub_key} 历史已花费 {self._sub_spent_points} 积分，剩余预算 {max(0, self._hdhive_max_points_per_sub - self._sub_spent_points)}")
             else:
-                logger.debug(f"HDHive (API) 订阅 {sub_key} 无历史积分花费")
+                logger.info(f"HDHive (API) 订阅 {sub_key} 无历史积分花费")
         else:
             self._sub_spent_points = 0
 
@@ -571,7 +572,7 @@ class SearchHandler:
         if sub_key in history:
             del history[sub_key]
             self._save_sub_points_history(history)
-            logger.debug(f"HDHive (API) 已清除订阅 {sub_key} 的历史积分记录")
+            logger.info(f"HDHive (API) 已清除订阅 {sub_key} 的历史积分记录")
 
     def unlock_hdhive_resource(self, slug: str, unlock_points: int) -> Optional[str]:
         """
@@ -600,8 +601,9 @@ class SearchHandler:
                 "X-API-Key": self._hdhive_api_key,
                 "Content-Type": "application/json"
             }
-            proxies = {"http": settings.PROXY, "https": settings.PROXY} if settings.PROXY else None
-            
+            proxy = settings.PROXY
+            proxies = proxy if isinstance(proxy, dict) else {"http": proxy, "https": proxy} if proxy else None
+
             unlock_url = "https://hdhive.com/api/open/resources/unlock"
             logger.info(f"HDHive (API) 触发后备按需积分解锁资源: {slug}")
             unlock_res = requests.post(unlock_url, json={"slug": slug}, headers=headers, proxies=proxies, timeout=15)
