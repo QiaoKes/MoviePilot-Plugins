@@ -1,4 +1,17 @@
 {
+  "OneBotNotify": {
+    "name": "OneBot通知",
+    "release": true,
+    "description": "接入 MoviePilot 普通通知消息，通过 OneBot v11 HTTP API 推送到 QQ。",
+    "labels": "通知,QQ,OneBot",
+    "version": "1.0.0",
+    "icon": "https://raw.githubusercontent.com/jxxghp/MoviePilot-Plugins/main/icons/QQ_A.png",
+    "author": "Codex",
+    "level": 1,
+    "history": {
+      "v1.0.0": "1. 接入 MoviePilot 普通通知消息；2. 支持 OneBot v11 群聊和私聊推送；3. 支持 Access Token、通知类型过滤和测试发送。"
+    }
+  },
   "EmbySubProgress": {
     "name": "Emby订阅进度同步",
     "release": true,
