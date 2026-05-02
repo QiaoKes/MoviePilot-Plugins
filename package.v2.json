@@ -1,4 +1,17 @@
 {
+  "EmbySubProgress": {
+    "name": "Emby订阅进度同步",
+    "release": true,
+    "description": "读取媒体服务器已入库剧集，回写 MoviePilot 我的订阅进度。",
+    "labels": "订阅,Emby,媒体库",
+    "version": "1.0.0",
+    "icon": "https://raw.githubusercontent.com/boeto/MoviePilot-Plugins/main/icons/Emby_A.png",
+    "author": "Codex",
+    "level": 1,
+    "history": {
+      "v1.0.0": "1. 支持从已配置媒体服务器读取电视剧已入库集数；2. 回写订阅 note 与 lack_episode；3. 支持定时同步、立即运行、排除订阅和完整后移至历史。"
+    }
+  },
   "P115StrgmSub": {
     "name": "115网盘订阅追更",
     "release": true,
